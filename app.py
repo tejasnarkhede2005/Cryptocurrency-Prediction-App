@@ -1,234 +1,405 @@
 import streamlit as st
-import pickle
 import numpy as np
-import base64
+import time
+import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 # ==========================
-# Load the Saved Model
+# App Configuration & Model
 # ==========================
+
+st.set_page_config(
+    page_title="Crypto Oracle",
+    page_icon="🔮",
+    layout="centered", # Use centered layout for a mobile feel
+    initial_sidebar_state="collapsed"
+)
+
 @st.cache_resource
 def load_model():
-    # This is a placeholder for model loading.
-    # In a real scenario, you would load your trained model.
-    # For demonstration, we'll create a dummy model.
-    from sklearn.linear_model import LinearRegression
-    # Create a dummy model that predicts based on the first feature
+    """A dummy model for demonstration."""
     dummy_model = LinearRegression()
-    # Fit with some dummy data so it can predict
-    dummy_model.fit(np.array([[1,1,1,1]]), np.array([1]))
+    dummy_model.fit(np.array([[1, 1, 1, 1]]), np.array([1]))
     return dummy_model
 
 model = load_model()
 
 # ==========================
-# Page Config
+# Session State Initialization
 # ==========================
-st.set_page_config(
-    page_title="Crypto Oracle",
-    page_icon="🔮",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+
+if 'active_page' not in st.session_state:
+    st.session_state.active_page = 'Predictor'
+if 'history' not in st.session_state:
+    st.session_state.history = []
 
 # ==========================
-# Custom CSS for New Theme
+# Custom CSS for Mobile App Look
 # ==========================
+
 st.markdown("""
 <style>
-    /* Main app background */
+    /* Reset and Base Styles */
+    body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    /* Main App Container */
     .stApp {
         background-color: #0E1117;
-        color: #c9d1d9;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-        color: #f0f6fc;
-    }
-
-    /* Navigation Bar */
-    .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 1000;
-        background-color: #161B22;
-        padding: 1rem 2rem;
-        border-bottom: 1px solid #30363d;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand {
-        font-size: 1.75rem;
-        font-weight: bold;
-        color: #f0f6fc;
-        text-decoration: none;
+        color: #FAFAFA;
     }
     
-    .navbar-brand .icon {
-        margin-right: 0.5rem;
+    /* Hide Streamlit Header/Footer */
+    header, footer {
+        visibility: hidden;
     }
 
-    .nav-links {
-        list-style: none;
-        margin: 0;
-        padding: 0;
+    /* Main Content Area */
+    .main-content {
+        padding: 1rem 1rem 6rem 1rem; /* Padding for content, bottom for nav bar */
+        max-width: 600px;
+        margin: auto;
+    }
+    
+    /* Custom Card */
+    .custom-card {
+        background-color: #161B22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 1rem;
+        transition: box-shadow 0.3s ease;
+    }
+    .custom-card:hover {
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #f0f6fc;
         display: flex;
         align-items: center;
     }
-
-    .nav-item {
-        margin-left: 1.5rem;
+    
+    h1 .icon {
+        font-size: 2rem;
+        margin-right: 0.8rem;
     }
 
-    .nav-link {
-        color: #c9d1d9;
-        text-decoration: none;
-        font-weight: 500;
+    h2 {
+        font-size: 1.3rem;
+        color: #8b949e;
+        border-bottom: 1px solid #30363d;
+        padding-bottom: 0.5rem;
+        margin-top: 0;
+    }
+
+    /* Sliders */
+    .stSlider [data-baseweb="slider"] {
+        padding-bottom: 10px;
+    }
+    
+    /* Predict Button */
+    div.stButton > button {
+        background: linear-gradient(45deg, #3672f8, #58a6ff);
+        color: white;
+        width: 100%;
+        border-radius: 8px;
+        padding: 12px 0;
+        font-weight: bold;
+        border: none;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(88, 166, 255, 0.3);
+    }
+
+    /* Prediction Result */
+    .prediction-result {
+        background-color: rgba(35, 134, 54, 0.2);
+        border: 1px solid #2ea043;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    .prediction-result .label {
         font-size: 1rem;
-        padding: 0.5rem 0;
-        position: relative;
-        transition: color 0.3s ease;
+        color: #8b949e;
+    }
+    .prediction-result .value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #3fb950;
     }
 
-    .nav-link::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 2px;
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+        position: fixed;
         bottom: 0;
         left: 0;
-        background-color: #58a6ff;
-        transition: width 0.3s ease;
+        width: 100%;
+        background-color: #161B22;
+        border-top: 1px solid #30363d;
+        display: flex;
+        justify-content: space-around;
+        padding: 0.5rem 0;
+        z-index: 100;
     }
-
-    .nav-link:hover {
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #8b949e;
+        cursor: pointer;
+        font-size: 0.75rem;
+        width: 33.33%;
+        padding: 0.25rem 0;
+        border: none;
+        background: none;
+        transition: color 0.2s;
+    }
+    .nav-item.active {
         color: #58a6ff;
     }
-
-    .nav-link:hover::after {
-        width: 100%;
+    .nav-item:hover {
+        color: #58a6ff;
     }
-    
-    /* Main content padding to avoid overlap with navbar */
-    .main-content {
-        padding-top: 80px; /* Adjust based on navbar height */
-        padding-left: 2rem;
-        padding-right: 2rem;
-        padding-bottom: 2rem;
-    }
-    
-    /* Card styling for the app */
-    .card {
-        background-color: #161B22;
-        border: 1px solid #30363d;
-        border-radius: 6px;
-        padding: 2rem;
-        margin-top: 2rem;
-    }
-    
-    /* Custom button style */
-    div.stButton > button {
-        background-color: #238636;
-        color: white;
-        border-radius: 6px;
-        padding: 0.75rem 1.5rem;
-        font-weight: bold;
-        border: 1px solid #2ea043;
-        transition: background-color 0.2s, border-color 0.2s;
+    .nav-item svg {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 4px;
     }
 
-    div.stButton > button:hover {
-        background-color: #2ea043;
-        border-color: #3fb950;
+    /* Market List */
+    .crypto-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid #30363d;
     }
-    
-    /* Success message styling */
-    .stSuccess {
-        background-color: rgba(56, 139, 253, 0.15);
-        border: 1px solid rgba(56, 139, 253, 0.4);
-        border-radius: 6px;
-        padding: 1rem;
-        color: #a5d6ff;
+    .crypto-item:last-child {
+        border-bottom: none;
     }
-    
-    /* Input field styling */
-    .stNumberInput > div > div > input {
+    .crypto-info {
+        display: flex;
+        align-items: center;
+    }
+    .crypto-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 1rem;
+    }
+    .crypto-name .symbol {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f0f6fc;
+    }
+    .crypto-name .fullname {
+        font-size: 0.9rem;
+        color: #8b949e;
+    }
+    .crypto-price .price {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f0f6fc;
+        text-align: right;
+    }
+    .crypto-price .change {
+        font-size: 0.9rem;
+        text-align: right;
+    }
+    .positive { color: #3fb950; }
+    .negative { color: #f85149; }
+
+    /* History List */
+    .history-item {
         background-color: #0d1117;
-        color: #c9d1d9;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
         border: 1px solid #30363d;
-        border-radius: 6px;
     }
 
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================
-# Navbar HTML
+# Page Rendering Functions
 # ==========================
+
+def render_predictor():
+    """Renders the main predictor interface."""
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
+    st.markdown("<h2>Input Market Features</h2>", unsafe_allow_html=True)
+
+    feature1 = st.slider("Market Cap (in billions USD)", min_value=1.0, max_value=2000.0, value=500.0, step=1.0)
+    feature2 = st.slider("24h Trading Volume (in billions USD)", min_value=0.1, max_value=500.0, value=50.0, step=0.1)
+    feature3 = st.slider("Daily Transactions (in thousands)", min_value=1.0, max_value=2000.0, value=300.0, step=1.0)
+    feature4 = st.slider("Active Addresses (in thousands)", min_value=1.0, max_value=2000.0, value=800.0, step=1.0)
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    if st.button("🚀 Predict Price"):
+        with st.spinner('Oracle is consulting the stars...'):
+            time.sleep(1.5)
+            features = np.array([[feature1, feature2, feature3, feature4]])
+            prediction = model.predict(features) * 100
+            pred_value = f"${prediction[0]:,.2f}"
+            
+            st.session_state.history.insert(0, {"value": pred_value, "features": [feature1, feature2, feature3, feature4]})
+            
+            st.markdown(
+                f"""
+                <div class="custom-card prediction-result">
+                    <div class="label">Predicted Value</div>
+                    <div class="value">{pred_value}</div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+def render_market():
+    """Renders the simulated live market page."""
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
+    st.markdown("<h2>Live Market</h2>", unsafe_allow_html=True)
+    
+    # Dummy data
+    market_data = [
+        {"symbol": "BTC", "name": "Bitcoin", "price": 68123.45, "change": 2.5, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/1.png"},
+        {"symbol": "ETH", "name": "Ethereum", "price": 3567.89, "change": -1.2, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"},
+        {"symbol": "SOL", "name": "Solana", "price": 165.21, "change": 5.8, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"},
+        {"symbol": "DOGE", "name": "Dogecoin", "price": 0.158, "change": 0.5, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"},
+    ]
+    
+    for item in market_data:
+        change_class = "positive" if item["change"] >= 0 else "negative"
+        st.markdown(
+            f"""
+            <div class="crypto-item">
+                <div class="crypto-info">
+                    <img src="{item['icon']}" class="crypto-icon" alt="{item['name']}">
+                    <div class="crypto-name">
+                        <div class="symbol">{item['symbol']}</div>
+                        <div class="fullname">{item['name']}</div>
+                    </div>
+                </div>
+                <div class="crypto-price">
+                    <div class="price">${item['price']:,.2f}</div>
+                    <div class="change {change_class}">{'+' if item['change'] >= 0 else ''}{item['change']}%</div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+def render_history():
+    """Renders the prediction history page."""
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
+    st.markdown("<h2>Prediction History</h2>", unsafe_allow_html=True)
+
+    if not st.session_state.history:
+        st.info("No predictions made yet.")
+    else:
+        for i, record in enumerate(st.session_state.history):
+            st.markdown(
+                f"""
+                <div class="history-item">
+                    <b>Prediction #{len(st.session_state.history) - i}:</b> <span style="float: right; font-size: 1.5em; color: #3fb950; font-weight: bold;">{record['value']}</span><br>
+                    <small>Features: {', '.join(map(str, record['features']))}</small>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ==========================
+# Main App Layout
+# ==========================
+st.markdown('<div class="main-content">', unsafe_allow_html=True)
+st.markdown('<h1><span class="icon">🔮</span>Crypto Oracle</h1>', unsafe_allow_html=True)
+
+# Page content based on session state
+if st.session_state.active_page == 'Predictor':
+    render_predictor()
+elif st.session_state.active_page == 'Market':
+    render_market()
+elif st.session_state.active_page == 'History':
+    render_history()
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ==========================
+# Bottom Navigation Logic
+# ==========================
+
+# Use columns for clickable buttons
+nav_cols = st.columns(3)
+
+# Note: The HTML/CSS below is for VISUALS ONLY. The logic is handled by the Streamlit buttons in the columns.
+# To make this work, we inject CSS to make the buttons transparent and overlay them on the visual nav bar.
 st.markdown("""
-<nav class="navbar">
-    <a href="#" class="navbar-brand"><span class="icon">🔮</span> Crypto Oracle</a>
-    <ul class="nav-links">
-        <li class="nav-item"><a href="#" class="nav-link">Home</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">About</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">Dashboard</a></li>
-        <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
-    </ul>
-</nav>
+<style>
+    /* Style the columns to act as transparent button containers */
+    div[data-testid="column"] {
+        cursor: pointer;
+    }
+    /* Hide the actual button visuals, keeping them clickable */
+    div.stButton > button {
+        background-color: transparent;
+        border: none;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    div.stButton > button:hover, div.stButton > button:focus {
+        background-color: rgba(88, 166, 255, 0.1);
+        border: none;
+    }
+</style>
 """, unsafe_allow_html=True)
 
+# HTML for the visual navigation bar
+st.markdown(
+    f"""
+    <div class="bottom-nav">
+        <div class="nav-item {'active' if st.session_state.active_page == 'Predictor' else ''}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
+            Predictor
+        </div>
+        <div class="nav-item {'active' if st.session_state.active_page == 'Market' else ''}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
+            Market
+        </div>
+        <div class="nav-item {'active' if st.session_state.active_page == 'History' else ''}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+            History
+        </div>
+    </div>
+    """, unsafe_allow_html=True
+)
 
-# Main content container
-st.markdown('<div class="main-content">', unsafe_allow_html=True)
-
-# ==========================
-# App Title inside the main content
-# ==========================
-st.markdown('<div class="card">', unsafe_allow_html=True)
-st.title("📈 Cryptocurrency Price Predictor")
-st.write("This app uses a Machine Learning model to predict cryptocurrency values based on market features.")
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ==========================
-# User Input Section in a card
-# ==========================
-st.markdown('<div class="card">', unsafe_allow_html=True)
-st.subheader("🔧 Enter Market Features")
-
-col1, col2 = st.columns(2)
-with col1:
-    feature1 = st.number_input("Market Cap (in billions USD)", min_value=0.0, step=1.0, value=500.0)
-    feature2 = st.number_input("24h Trading Volume (in billions USD)", min_value=0.0, step=0.1, value=50.0)
-with col2:
-    feature3 = st.number_input("Daily Transactions (in thousands)", min_value=0.0, step=1.0, value=300.0)
-    feature4 = st.number_input("Active Addresses (in thousands)", min_value=0.0, step=1.0, value=800.0)
-
-# Collect into numpy array
-features = np.array([[feature1, feature2, feature3, feature4]])
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ==========================
-# Prediction Section
-# ==========================
-st.markdown('<div class="card">', unsafe_allow_html=True)
-if st.button("🚀 Predict Price"):
-    with st.spinner('Analyzing the market...'):
-        # In a real app, you might have some delay or complex calculation
-        import time
-        time.sleep(1) 
-        
-        # NOTE: Using a dummy model, so prediction is not real
-        # The placeholder model just uses the first feature as prediction
-        prediction = model.predict(features) * 100 
-        
-        st.success(f"**Predicted Value:** `${prediction[0]:,.2f}`")
-st.markdown('</div>', unsafe_allow_html=True)
-
-
-# Close the main content div
-st.markdown('</div>', unsafe_allow_html=True)
+# Use the columns to place invisible buttons that trigger the page change
+if nav_cols[0].button("p", key="pred_btn"):
+    st.session_state.active_page = 'Predictor'
+    st.rerun()
+if nav_cols[1].button("m", key="market_btn"):
+    st.session_state.active_page = 'Market'
+    st.rerun()
+if nav_cols[2].button("h", key="history_btn"):
+    st.session_state.active_page = 'History'
+    st.rerun()
 
