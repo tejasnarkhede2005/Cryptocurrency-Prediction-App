@@ -58,7 +58,7 @@ st.markdown("""
 
     /* Main Content Area */
     .main-content {
-        padding: 1rem 1rem 6rem 1rem; /* Padding for content, bottom for nav bar */
+        padding: 1rem 1rem 6rem 1rem; /* Padding for content */
         max-width: 600px;
         margin: auto;
     }
@@ -138,44 +138,6 @@ st.markdown("""
         font-size: 2.5rem;
         font-weight: 700;
         color: #3fb950;
-    }
-
-    /* Bottom Navigation Bar */
-    .bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background-color: #161B22;
-        border-top: 1px solid #30363d;
-        display: flex;
-        justify-content: space-around;
-        padding: 0.5rem 0;
-        z-index: 100;
-    }
-    .nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: #8b949e;
-        cursor: pointer;
-        font-size: 0.75rem;
-        width: 33.33%;
-        padding: 0.25rem 0;
-        border: none;
-        background: none;
-        transition: color 0.2s;
-    }
-    .nav-item.active {
-        color: #58a6ff;
-    }
-    .nav-item:hover {
-        color: #58a6ff;
-    }
-    .nav-item svg {
-        width: 24px;
-        height: 24px;
-        margin-bottom: 4px;
     }
 
     /* Market List */
@@ -341,67 +303,85 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ==========================
-# Bottom Navigation Logic
+# Vertical Navigation Logic
 # ==========================
 
-# Use columns for clickable buttons
-nav_cols = st.columns(3)
+# This container will hold our buttons and we'll style it with CSS
+st.markdown('<div class="vertical-nav">', unsafe_allow_html=True)
+nav_container = st.container()
+with nav_container:
+    if st.button("🔮 Predictor", key="pred_btn_v"):
+        st.session_state.active_page = 'Predictor'
+        st.rerun()
+    if st.button("📈 Market", key="market_btn_v"):
+        st.session_state.active_page = 'Market'
+        st.rerun()
+    if st.button("📜 History", key="history_btn_v"):
+        st.session_state.active_page = 'History'
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Note: The HTML/CSS below is for VISUALS ONLY. The logic is handled by the Streamlit buttons in the columns.
-# To make this work, we inject CSS to make the buttons transparent and overlay them on the visual nav bar.
-st.markdown("""
+# CSS for the vertical navigation container and buttons
+vertical_nav_css = """
 <style>
-    /* Style the columns to act as transparent button containers */
-    div[data-testid="column"] {
-        cursor: pointer;
+    .vertical-nav {
+        position: fixed;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* Space between buttons */
     }
-    /* Hide the actual button visuals, keeping them clickable */
-    div.stButton > button {
-        background-color: transparent;
-        border: none;
-        width: 100%;
-        height: 100%;
-        padding: 0;
-        margin: 0;
-        position: absolute;
-        top: 0;
-        left: 0;
+    
+    /* This targets the Streamlit button styling specifically within our vertical nav */
+    .vertical-nav .stButton > button {
+        background-color: #161B22;
+        color: #c9d1d9; /* Lighter text for readability */
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 12px;
+        width: 130px; 
+        font-weight: 500;
+        font-size: 1rem;
+        text-align: left; /* Align icon and text to the left */
+        transition: all 0.2s ease-in-out;
     }
-    div.stButton > button:hover, div.stButton > button:focus {
-        background-color: rgba(88, 166, 255, 0.1);
-        border: none;
+    
+    .vertical-nav .stButton > button:hover {
+        border-color: #58a6ff;
+        color: #58a6ff;
+    }
+
+    /* Override the default Streamlit button styling for this specific container */
+    .vertical-nav div[data-testid="stButton"] button {
+        background: linear-gradient(45deg, #3672f8, #58a6ff) !important;
+        background-color: #161B22 !important;
     }
 </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(vertical_nav_css, unsafe_allow_html=True)
 
-# HTML for the visual navigation bar
-st.markdown(
-    f"""
-    <div class="bottom-nav">
-        <div class="nav-item {'active' if st.session_state.active_page == 'Predictor' else ''}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
-            Predictor
-        </div>
-        <div class="nav-item {'active' if st.session_state.active_page == 'Market' else ''}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
-            Market
-        </div>
-        <div class="nav-item {'active' if st.session_state.active_page == 'History' else ''}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
-            History
-        </div>
-    </div>
-    """, unsafe_allow_html=True
-)
+# Dynamic CSS to highlight the active button
+active_page = st.session_state.active_page
+active_button_selector = ""
+# We need to target the element-container that Streamlit wraps around each button
+if active_page == 'Predictor':
+    active_button_selector = ".vertical-nav .element-container:nth-child(1) .stButton > button"
+elif active_page == 'Market':
+    active_button_selector = ".vertical-nav .element-container:nth-child(2) .stButton > button"
+elif active_page == 'History':
+    active_button_selector = ".vertical-nav .element-container:nth-child(3) .stButton > button"
 
-# Use the columns to place invisible buttons that trigger the page change
-if nav_cols[0].button("p", key="pred_btn"):
-    st.session_state.active_page = 'Predictor'
-    st.rerun()
-if nav_cols[1].button("m", key="market_btn"):
-    st.session_state.active_page = 'Market'
-    st.rerun()
-if nav_cols[2].button("h", key="history_btn"):
-    st.session_state.active_page = 'History'
-    st.rerun()
+active_button_css = f"""
+<style>
+    {active_button_selector} {{
+        background-color: #58a6ff !important;
+        color: white !important; /* Use important to override Streamlit's default styles */
+        border: 1px solid #58a6ff !important;
+    }}
+</style>
+"""
+st.markdown(active_button_css, unsafe_allow_html=True)
 
