@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 # ==========================
 
 st.set_page_config(
-    page_title="Crypto Oracle",
+    page_title="Crypto Predictor",
     page_icon="🔮",
     layout="centered", # Use centered layout for a mobile feel
     initial_sidebar_state="collapsed"
@@ -108,11 +108,13 @@ st.markdown("""
         color: white;
         width: 100%;
         border-radius: 8px;
-        padding: 12px 0;
+        padding: 16px 0; /* Increased padding for a larger button */
         font-weight: bold;
+        font-size: 1.1rem; /* Larger font size */
         border: none;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: transform 0.2s, box-shadow 0.2s;
+        margin-top: 1rem; /* Added margin on top */
     }
     div.stButton > button:hover {
         transform: translateY(-2px);
@@ -325,7 +327,7 @@ def render_history():
 # Main App Layout
 # ==========================
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
-st.markdown('<h1><span class="icon">🔮</span>Crypto Oracle</h1>', unsafe_allow_html=True)
+st.markdown('<h1><span class="icon">🔮</span>Crypto Predictor</h1>', unsafe_allow_html=True)
 
 # Page content based on session state
 if st.session_state.active_page == 'Predictor':
