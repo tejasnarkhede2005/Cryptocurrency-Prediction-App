@@ -31,18 +31,18 @@ st.set_page_config(
 )
 
 # ==========================
-# Custom CSS for Navbar and Styling
+# Custom CSS for New Theme
 # ==========================
 st.markdown("""
 <style>
     /* Main app background */
     .stApp {
-        background-color: #1a202c;
-        color: #e2e8f0;
+        background-color: #0E1117;
+        color: #c9d1d9;
     }
 
     h1, h2, h3, h4, h5, h6 {
-        color: #ffffff;
+        color: #f0f6fc;
     }
 
     /* Navigation Bar */
@@ -52,23 +52,19 @@ st.markdown("""
         left: 0;
         width: 100%;
         z-index: 1000;
-        background-color: #2d3748;
+        background-color: #161B22;
         padding: 1rem 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+        border-bottom: 1px solid #30363d;
         display: flex;
         justify-content: space-between;
         align-items: center;
         transition: all 0.3s ease;
     }
 
-    .navbar:hover {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
-    }
-
     .navbar-brand {
         font-size: 1.75rem;
         font-weight: bold;
-        color: #ffffff;
+        color: #f0f6fc;
         text-decoration: none;
     }
     
@@ -89,7 +85,7 @@ st.markdown("""
     }
 
     .nav-link {
-        color: #a0aec0;
+        color: #c9d1d9;
         text-decoration: none;
         font-weight: 500;
         font-size: 1rem;
@@ -105,12 +101,12 @@ st.markdown("""
         height: 2px;
         bottom: 0;
         left: 0;
-        background-color: #4299e1;
+        background-color: #58a6ff;
         transition: width 0.3s ease;
     }
 
     .nav-link:hover {
-        color: #4299e1;
+        color: #58a6ff;
     }
 
     .nav-link:hover::after {
@@ -122,40 +118,49 @@ st.markdown("""
         padding-top: 80px; /* Adjust based on navbar height */
         padding-left: 2rem;
         padding-right: 2rem;
+        padding-bottom: 2rem;
     }
     
     /* Card styling for the app */
     .card {
-        background-color: #2d3748;
-        border-radius: 12px;
+        background-color: #161B22;
+        border: 1px solid #30363d;
+        border-radius: 6px;
         padding: 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
         margin-top: 2rem;
     }
     
     /* Custom button style */
     div.stButton > button {
-        background-color: #4299e1;
+        background-color: #238636;
         color: white;
-        border-radius: 8px;
+        border-radius: 6px;
         padding: 0.75rem 1.5rem;
         font-weight: bold;
-        border: none;
-        transition: background-color 0.3s, transform 0.2s;
+        border: 1px solid #2ea043;
+        transition: background-color 0.2s, border-color 0.2s;
     }
 
     div.stButton > button:hover {
-        background-color: #2b6cb0;
-        transform: scale(1.05);
+        background-color: #2ea043;
+        border-color: #3fb950;
     }
     
     /* Success message styling */
     .stSuccess {
-        background-color: #2f4539;
-        border-left: 5px solid #38a169;
-        border-radius: 8px;
+        background-color: rgba(56, 139, 253, 0.15);
+        border: 1px solid rgba(56, 139, 253, 0.4);
+        border-radius: 6px;
         padding: 1rem;
-        color: #c6f6d5;
+        color: #a5d6ff;
+    }
+    
+    /* Input field styling */
+    .stNumberInput > div > div > input {
+        background-color: #0d1117;
+        color: #c9d1d9;
+        border: 1px solid #30363d;
+        border-radius: 6px;
     }
 
 </style>
