@@ -37,7 +37,12 @@ st.markdown("""
 <style>
     /* Main app background */
     .stApp {
-        background-color: #f0f2f6;
+        background-color: #1a202c;
+        color: #e2e8f0;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #ffffff;
     }
 
     /* Navigation Bar */
@@ -46,10 +51,10 @@ st.markdown("""
         top: 0;
         left: 0;
         width: 100%;
-        z-index: 1;
-        background-color: #ffffff;
+        z-index: 1000;
+        background-color: #2d3748;
         padding: 1rem 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -57,13 +62,13 @@ st.markdown("""
     }
 
     .navbar:hover {
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
     }
 
     .navbar-brand {
         font-size: 1.75rem;
         font-weight: bold;
-        color: #1a1a1a;
+        color: #ffffff;
         text-decoration: none;
     }
     
@@ -84,7 +89,7 @@ st.markdown("""
     }
 
     .nav-link {
-        color: #555;
+        color: #a0aec0;
         text-decoration: none;
         font-weight: 500;
         font-size: 1rem;
@@ -100,12 +105,12 @@ st.markdown("""
         height: 2px;
         bottom: 0;
         left: 0;
-        background-color: #007bff;
+        background-color: #4299e1;
         transition: width 0.3s ease;
     }
 
     .nav-link:hover {
-        color: #007bff;
+        color: #4299e1;
     }
 
     .nav-link:hover::after {
@@ -121,16 +126,16 @@ st.markdown("""
     
     /* Card styling for the app */
     .card {
-        background-color: #ffffff;
+        background-color: #2d3748;
         border-radius: 12px;
         padding: 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
         margin-top: 2rem;
     }
     
     /* Custom button style */
     div.stButton > button {
-        background-color: #007bff;
+        background-color: #4299e1;
         color: white;
         border-radius: 8px;
         padding: 0.75rem 1.5rem;
@@ -140,17 +145,17 @@ st.markdown("""
     }
 
     div.stButton > button:hover {
-        background-color: #0056b3;
+        background-color: #2b6cb0;
         transform: scale(1.05);
     }
     
     /* Success message styling */
     .stSuccess {
-        background-color: #e6ffed;
-        border-left: 5px solid #4caf50;
+        background-color: #2f4539;
+        border-left: 5px solid #38a169;
         border-radius: 8px;
         padding: 1rem;
-        color: #2e7d32;
+        color: #c6f6d5;
     }
 
 </style>
@@ -221,3 +226,4 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # Close the main content div
 st.markdown('</div>', unsafe_allow_html=True)
+
