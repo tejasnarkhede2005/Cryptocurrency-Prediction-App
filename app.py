@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import time
 import random
+import requests
 from sklearn.linear_model import LinearRegression
 
 # ==========================
@@ -34,41 +35,32 @@ if 'history' not in st.session_state:
     st.session_state.history = []
 
 # ==========================
-# Simulated API Data Fetching
+# Live API Data Fetching
 # ==========================
 
-@st.cache_data(ttl=10) # Cache data for 10 seconds for a "live" feel
+@st.cache_data(ttl=900) # Cache data for 15 minutes to avoid API rate limits
 def get_live_prices():
     """
-    Generates simulated live cryptocurrency prices to avoid API rate limits.
-    This makes the app more stable for demonstration.
+    Fetches live cryptocurrency prices from the CoinGecko API.
     """
-    coins = [
-        {"id": "bitcoin", "symbol": "btc", "name": "Bitcoin", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/1.png", "base_price": 68000},
-        {"id": "ethereum", "symbol": "eth", "name": "Ethereum", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png", "base_price": 3500},
-        {"id": "solana", "symbol": "sol", "name": "Solana", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png", "base_price": 165},
-        {"id": "dogecoin", "symbol": "doge", "name": "Dogecoin", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png", "base_price": 0.15},
-        {"id": "ripple", "symbol": "xrp", "name": "XRP", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png", "base_price": 0.52}
-    ]
-
-    simulated_data = []
-    for coin in coins:
-        # Simulate small price fluctuations around a base price
-        price_fluctuation = 1 + (random.uniform(-0.05, 0.05)) # Fluctuate by +/- 5%
-        current_price = coin["base_price"] * price_fluctuation
-        
-        # Simulate a random 24-hour price change
-        price_change_percentage_24h = random.uniform(-5.0, 5.0)
-
-        simulated_data.append({
-            "image": coin["image"],
-            "name": coin["name"],
-            "symbol": coin["symbol"],
-            "current_price": current_price,
-            "price_change_percentage_24h": price_change_percentage_24h,
-        })
-        
-    return simulated_data
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    # A list of popular cryptocurrencies
+    coin_ids = "bitcoin,ethereum,ripple,tether,binancecoin,solana,usd-coin,dogecoin"
+    params = {
+        "vs_currency": "usd",
+        "ids": coin_ids,
+        "order": "market_cap_desc",
+        "per_page": 10,
+        "page": 1,
+        "sparkline": "false"
+    }
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  # Raise an error for bad responses (4xx or 5xx)
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching live prices: {e}")
+        return None
 
 
 # ==========================
@@ -306,7 +298,7 @@ def render_predictor():
             )
 
 def render_market():
-    """Renders the live market page using simulated data."""
+    """Renders the live market page using data from an API."""
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("<h2>Live Market</h2>", unsafe_allow_html=True)
     
@@ -314,20 +306,20 @@ def render_market():
     
     if market_data:
         for item in market_data:
-            change_class = "positive" if item["price_change_percentage_24h"] >= 0 else "negative"
+            change_class = "positive" if item.get("price_change_percentage_24h", 0) >= 0 else "negative"
             st.markdown(
                 f"""
                 <div class="crypto-item">
                     <div class="crypto-info">
-                        <img src="{item['image']}" class="crypto-icon" alt="{item['name']}">
+                        <img src="{item.get('image', '')}" class="crypto-icon" alt="{item.get('name', '')}">
                         <div class="crypto-name">
-                            <div class="symbol">{item['symbol'].upper()}</div>
-                            <div class="fullname">{item['name']}</div>
+                            <div class="symbol">{item.get('symbol', '').upper()}</div>
+                            <div class="fullname">{item.get('name', '')}</div>
                         </div>
                     </div>
                     <div class="crypto-price">
-                        <div class="price">${item['current_price']:,.2f}</div>
-                        <div class="change {change_class}">{item['price_change_percentage_24h']:.2f}%</div>
+                        <div class="price">${item.get('current_price', 0):,.2f}</div>
+                        <div class="change {change_class}">{item.get('price_change_percentage_24h', 0):.2f}%</div>
                     </div>
                 </div>
                 """,
