@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import time
-import pandas as pd
+import requests
 from sklearn.linear_model import LinearRegression
 
 # ==========================
@@ -11,9 +11,12 @@ from sklearn.linear_model import LinearRegression
 st.set_page_config(
     page_title="Crypto Predictor",
     page_icon="🔮",
-    layout="centered", # Use centered layout for a mobile feel
+    layout="centered",
     initial_sidebar_state="collapsed"
 )
+
+# IMPORTANT: Hardcoding API keys is not secure. Use Streamlit secrets for production apps.
+GEMINI_API_KEY = "AIzaSyAOkNF2mknMUEHcI0Hpg3iKC4dJSk_iWIc"
 
 @st.cache_resource
 def load_model():
@@ -32,6 +35,31 @@ if 'active_page' not in st.session_state:
     st.session_state.active_page = 'Predictor'
 if 'history' not in st.session_state:
     st.session_state.history = []
+
+# ==========================
+# API Data Fetching
+# ==========================
+
+@st.cache_data(ttl=60) # Cache data for 60 seconds
+def get_live_prices():
+    """Fetches live cryptocurrency prices from an API."""
+    # Using CoinGecko's public API as a reliable source for live prices
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    params = {
+        "vs_currency": "usd",
+        "ids": "bitcoin,ethereum,solana,dogecoin,ripple", # Specify coins
+        "order": "market_cap_desc",
+        "per_page": 10,
+        "page": 1,
+        "sparkline": "false"
+    }
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching live prices: {e}")
+        return None
 
 # ==========================
 # Custom CSS for Mobile App Look
@@ -268,39 +296,38 @@ def render_predictor():
             )
 
 def render_market():
-    """Renders the simulated live market page."""
+    """Renders the live market page by fetching data from an API."""
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("<h2>Live Market</h2>", unsafe_allow_html=True)
     
-    # Dummy data
-    market_data = [
-        {"symbol": "BTC", "name": "Bitcoin", "price": 68123.45, "change": 2.5, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/1.png"},
-        {"symbol": "ETH", "name": "Ethereum", "price": 3567.89, "change": -1.2, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png"},
-        {"symbol": "SOL", "name": "Solana", "price": 165.21, "change": 5.8, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png"},
-        {"symbol": "DOGE", "name": "Dogecoin", "price": 0.158, "change": 0.5, "icon": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png"},
-    ]
+    market_data = get_live_prices()
     
-    for item in market_data:
-        change_class = "positive" if item["change"] >= 0 else "negative"
-        st.markdown(
-            f"""
-            <div class="crypto-item">
-                <div class="crypto-info">
-                    <img src="{item['icon']}" class="crypto-icon" alt="{item['name']}">
-                    <div class="crypto-name">
-                        <div class="symbol">{item['symbol']}</div>
-                        <div class="fullname">{item['name']}</div>
+    if market_data:
+        for item in market_data:
+            change_class = "positive" if item["price_change_percentage_24h"] >= 0 else "negative"
+            st.markdown(
+                f"""
+                <div class="crypto-item">
+                    <div class="crypto-info">
+                        <img src="{item['image']}" class="crypto-icon" alt="{item['name']}">
+                        <div class="crypto-name">
+                            <div class="symbol">{item['symbol'].upper()}</div>
+                            <div class="fullname">{item['name']}</div>
+                        </div>
+                    </div>
+                    <div class="crypto-price">
+                        <div class="price">${item['current_price']:,.2f}</div>
+                        <div class="change {change_class}">{item['price_change_percentage_24h']:.2f}%</div>
                     </div>
                 </div>
-                <div class="crypto-price">
-                    <div class="price">${item['price']:,.2f}</div>
-                    <div class="change {change_class}">{'+' if item['change'] >= 0 else ''}{item['change']}%</div>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+                """,
+                unsafe_allow_html=True
+            )
+    else:
+        st.warning("Could not retrieve live market data. Please try again later.")
+    
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 def render_history():
     """Renders the prediction history page."""
