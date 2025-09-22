@@ -357,7 +357,7 @@ def render_history():
 # Main App Layout
 # ==========================
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
-st.markdown('<h1><span class="icon">🔮</span>Crypto Oracle</h1>', unsafe_allow_html=True)
+st.markdown('<h1><span class="icon">🔮</span>Crypto Currency Prediction</h1>', unsafe_allow_html=True)
 
 # Page content based on session state
 if st.session_state.active_page == 'Predictor':
@@ -435,4 +435,5 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
 
