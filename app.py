@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression
 # ==========================
 
 st.set_page_config(
-    page_title="Crypto Currency Prediction",
+    page_title="CryptoCurrency Prediction",
     page_icon="🔮",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -18,9 +18,14 @@ st.set_page_config(
 
 @st.cache_resource
 def load_model():
-    """A dummy model for demonstration."""
+    """A dummy model that responds to input for demonstration."""
     dummy_model = LinearRegression()
-    dummy_model.fit(np.array([[1, 1, 1, 1]]), np.array([1]))
+    # Fit on a zero array just to initialize the model structure
+    dummy_model.fit(np.zeros((1, 4)), np.zeros(1))
+    # Manually set coefficients and intercept for a dynamic response
+    # These values are chosen to create a plausible-looking prediction
+    dummy_model.coef_ = np.array([0.1, 0.2, 0.05, 0.15])
+    dummy_model.intercept_ = 150.0  # Set a base value for the prediction
     return dummy_model
 
 model = load_model()
@@ -283,7 +288,7 @@ def render_predictor():
         with st.spinner('Oracle is consulting the stars...'):
             time.sleep(1.5)
             features = np.array([[feature1, feature2, feature3, feature4]])
-            prediction = model.predict(features) * 100
+            prediction = model.predict(features)
             pred_value = f"${prediction[0]:,.2f}"
             
             st.session_state.history.insert(0, {"value": pred_value, "features": [feature1, feature2, feature3, feature4]})
@@ -435,5 +440,4 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
 
