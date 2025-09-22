@@ -10,7 +10,7 @@ from sklearn.linear_model import LinearRegression
 # ==========================
 
 st.set_page_config(
-    page_title="Crypto Predictor",
+    page_title="Crypto Currency Prediction",
     page_icon="🔮",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -112,6 +112,7 @@ st.markdown("""
         color: #f0f6fc;
         display: flex;
         align-items: center;
+        margin-bottom: 2rem;
     }
     
     h1 .icon {
@@ -356,7 +357,7 @@ def render_history():
 # Main App Layout
 # ==========================
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
-st.markdown('<h1><span class="icon">🔮</span>Crypto Predictor</h1>', unsafe_allow_html=True)
+st.markdown('<h1><span class="icon">🔮</span>Crypto Oracle</h1>', unsafe_allow_html=True)
 
 # Page content based on session state
 if st.session_state.active_page == 'Predictor':
