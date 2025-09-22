@@ -2,7 +2,6 @@ import streamlit as st
 import numpy as np
 import time
 import random
-import requests
 from sklearn.linear_model import LinearRegression
 
 # ==========================
@@ -35,29 +34,42 @@ if 'history' not in st.session_state:
     st.session_state.history = []
 
 # ==========================
-# Live API Data Fetching
+# Simulated API Data Fetching
 # ==========================
 
-@st.cache_data(ttl=600) # Cache data for 10 minutes to avoid rate limiting
+@st.cache_data(ttl=10) # Cache data for 10 seconds for a "live" feel
 def get_live_prices():
-    """Fetches live cryptocurrency prices from an API."""
-    # Using CoinGecko's public API as a reliable source for live prices
-    url = "https://api.coingecko.com/api/v3/coins/markets"
-    params = {
-        "vs_currency": "usd",
-        "ids": "bitcoin,ethereum,solana,dogecoin,ripple", # Specify coins
-        "order": "market_cap_desc",
-        "per_page": 10,
-        "page": 1,
-        "sparkline": "false"
-    }
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx or 5xx)
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching live prices: {e}")
-        return None
+    """
+    Generates simulated live cryptocurrency prices to avoid API rate limits.
+    This makes the app more stable for demonstration.
+    """
+    coins = [
+        {"id": "bitcoin", "symbol": "btc", "name": "Bitcoin", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/1.png", "base_price": 68000},
+        {"id": "ethereum", "symbol": "eth", "name": "Ethereum", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png", "base_price": 3500},
+        {"id": "solana", "symbol": "sol", "name": "Solana", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png", "base_price": 165},
+        {"id": "dogecoin", "symbol": "doge", "name": "Dogecoin", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/74.png", "base_price": 0.15},
+        {"id": "ripple", "symbol": "xrp", "name": "XRP", "image": "https://s2.coinmarketcap.com/static/img/coins/64x64/52.png", "base_price": 0.52}
+    ]
+
+    simulated_data = []
+    for coin in coins:
+        # Simulate small price fluctuations around a base price
+        price_fluctuation = 1 + (random.uniform(-0.05, 0.05)) # Fluctuate by +/- 5%
+        current_price = coin["base_price"] * price_fluctuation
+        
+        # Simulate a random 24-hour price change
+        price_change_percentage_24h = random.uniform(-5.0, 5.0)
+
+        simulated_data.append({
+            "image": coin["image"],
+            "name": coin["name"],
+            "symbol": coin["symbol"],
+            "current_price": current_price,
+            "price_change_percentage_24h": price_change_percentage_24h,
+        })
+        
+    return simulated_data
+
 
 # ==========================
 # Custom CSS for Mobile App Look
@@ -294,7 +306,7 @@ def render_predictor():
             )
 
 def render_market():
-    """Renders the live market page using data from an API."""
+    """Renders the live market page using simulated data."""
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("<h2>Live Market</h2>", unsafe_allow_html=True)
     
