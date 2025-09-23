@@ -1,6 +1,6 @@
 # Cryptocurrency-Prediction-App
 
-live app link : https://cryptocurrency-prediction-app.streamlit.app/
+live app link : (https://cryptocurrency-prediction-app.streamlit.app/)
 
 ```mermaid
 
