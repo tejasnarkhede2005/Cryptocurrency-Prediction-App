@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import time
-import random
 import requests
 from sklearn.linear_model import LinearRegression
 
@@ -23,7 +22,6 @@ def load_model():
     # Fit on a zero array just to initialize the model structure
     dummy_model.fit(np.zeros((1, 4)), np.zeros(1))
     # Manually set coefficients and intercept for a dynamic response
-    # These values are chosen to create a plausible-looking prediction
     dummy_model.coef_ = np.array([0.1, 0.2, 0.05, 0.15])
     dummy_model.intercept_ = 150.0  # Set a base value for the prediction
     return dummy_model
@@ -35,7 +33,7 @@ model = load_model()
 # ==========================
 
 if 'active_page' not in st.session_state:
-    st.session_state.active_page = 'Predictor'
+    st.session_state.active_page = 'Home' # Renamed for clarity
 if 'history' not in st.session_state:
     st.session_state.history = []
 
@@ -49,7 +47,6 @@ def get_live_prices():
     Fetches live cryptocurrency prices from the CoinGecko API.
     """
     url = "https://api.coingecko.com/api/v3/coins/markets"
-    # A list of popular cryptocurrencies
     coin_ids = "bitcoin,ethereum,ripple,tether,binancecoin,solana,usd-coin,dogecoin"
     params = {
         "vs_currency": "usd",
@@ -98,7 +95,7 @@ st.markdown("""
         margin: auto;
     }
     
-   
+    
     
     h1 {
         font-size: 1.8rem;
@@ -106,12 +103,24 @@ st.markdown("""
         color: #f0f6fc;
         display: flex;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem; /* Adjusted margin */
     }
     
     h1 .icon {
         font-size: 2rem;
         margin-right: 0.8rem;
+    }
+
+    /* Subtitle Style */
+    .subtitle {
+        font-size: 1rem;
+        color: #8b949e;
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 0.75rem;
+        background-color: #161B22;
+        border-radius: 12px;
+        border: 1px solid #30363d;
     }
 
     h2 {
@@ -133,13 +142,13 @@ st.markdown("""
         color: white;
         width: 100%;
         border-radius: 8px;
-        padding: 16px 0; /* Increased padding for a larger button */
+        padding: 16px 0;
         font-weight: bold;
-        font-size: 1.1rem; /* Larger font size */
+        font-size: 1.1rem;
         border: none;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: transform 0.2s, box-shadow 0.2s;
-        margin-top: 1rem; /* Added margin on top */
+        margin-top: 1rem;
     }
     .main-content .stButton > button:hover {
         transform: translateY(-2px);
@@ -165,19 +174,60 @@ st.markdown("""
         color: #3fb950;
     }
 
-    /* Bottom Navigation Bar */
+    /* --- TOP NAVIGATION BAR --- */
+    .top-nav {
+        background-color: #161B22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 0.5rem;
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 1.5rem;
+    }
+    .top-nav-item {
+        color: #8b949e;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: background-color 0.3s, color 0.3s;
+        cursor: pointer;
+        text-align: center;
+        flex: 1;
+    }
+    .top-nav-item.active {
+        background: linear-gradient(45deg, #3672f8, #58a6ff);
+        color: white;
+    }
+    .top-nav-container {
+        position: absolute;
+        width: calc(100% - 2rem);
+        max-width: 600px;
+        height: 54px; /* Match visual bar height */
+        z-index: 102;
+    }
+    .top-nav-container .stButton > button {
+        background: transparent !important;
+        border: none !important;
+        color: transparent !important;
+        width: 100%;
+        height: 54px;
+    }
+
+
+    /* --- BOTTOM NAVIGATION BAR --- */
     .bottom-nav {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        background-color: #161B22;
-        border-top: 1px solid #30363d;
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364); 
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
         display: flex;
         justify-content: space-around;
         padding: 0.5rem 0;
         z-index: 100;
     }
+    
     .nav-item {
         display: flex;
         flex-direction: column;
@@ -202,7 +252,27 @@ st.markdown("""
         height: 24px;
         margin-bottom: 4px;
     }
+    .bottom-nav-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 101; /* Above the visual nav bar */
+        height: 65px; /* Match visual bar height */
+    }
+    .bottom-nav-container .stButton > button {
+        background: transparent;
+        border: none;
+        color: transparent; /* Hide button text */
+        width: 100%;
+        height: 65px;
+    }
+    .bottom-nav-container .stButton > button:hover {
+        background-color: rgba(88, 166, 255, 0.1);
+        border-radius: 10px;
+    }
 
+    /* --- OTHER STYLES --- */
     /* Market List */
     .crypto-item {
         display: flex;
@@ -253,7 +323,6 @@ st.markdown("""
         margin-bottom: 0.5rem;
         border: 1px solid #30363d;
     }
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -261,7 +330,7 @@ st.markdown("""
 # Page Rendering Functions
 # ==========================
 
-def render_predictor():
+def render_home():
     """Renders the main predictor interface."""
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("<h2>Input Market Features</h2>", unsafe_allow_html=True)
@@ -346,20 +415,82 @@ def render_history():
             )
     st.markdown('</div>', unsafe_allow_html=True)
 
+def render_about():
+    """Renders the about page."""
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
+    st.markdown("<h2>About This App</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    <p>This application provides cryptocurrency price predictions based on a machine learning model.</p>
+    <strong>Key Features:</strong>
+    <ul>
+        <li><strong>AI-Powered Predictions:</strong> Uses a regression model to forecast prices based on market features.</li>
+        <li><strong>Live Market Data:</strong> Fetches real-time crypto prices from the CoinGecko API.</li>
+        <li><strong>Prediction History:</strong> Keeps a record of all your past predictions.</li>
+    </ul>
+    <p><em>Disclaimer: The predictions provided by this tool are for informational and educational purposes only. They should not be considered financial advice.</em></p>
+    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ==========================
 # Main App Layout
 # ==========================
+
+# --- TOP NAVIGATION ---
+# This is a hacky way to create a clickable nav bar in Streamlit
+# 1. Create the visual HTML bar
+# 2. Create an invisible container of Streamlit buttons layered on top
+
+st.markdown(
+    f"""
+    <div class="top-nav">
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'Home' else ''}">Home</div>
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'Market' else ''}">Market</div>
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'History' else ''}">History</div>
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'About' else ''}">About</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Invisible button container
+st.markdown('<div class="top-nav-container">', unsafe_allow_html=True)
+top_nav_cols = st.columns(4)
+with top_nav_cols[0]:
+    if st.button("Home", key="home_btn_top", use_container_width=True):
+        st.session_state.active_page = 'Home'
+        st.rerun()
+with top_nav_cols[1]:
+    if st.button("Market", key="market_btn_top", use_container_width=True):
+        st.session_state.active_page = 'Market'
+        st.rerun()
+with top_nav_cols[2]:
+    if st.button("History", key="history_btn_top", use_container_width=True):
+        st.session_state.active_page = 'History'
+        st.rerun()
+with top_nav_cols[3]:
+    if st.button("About", key="about_btn_top", use_container_width=True):
+        st.session_state.active_page = 'About'
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- MAIN CONTENT ---
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
+
 st.markdown('<h1><span class="icon">🔮</span>Crypto Currency Prediction</h1>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Your AI-powered crypto price oracle. Adjust the sliders below to get a prediction.</div>', unsafe_allow_html=True)
+
 
 # Page content based on session state
-if st.session_state.active_page == 'Predictor':
-    render_predictor()
+if st.session_state.active_page == 'Home':
+    render_home()
 elif st.session_state.active_page == 'Market':
     render_market()
 elif st.session_state.active_page == 'History':
     render_history()
+elif st.session_state.active_page == 'About':
+    render_about()
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -372,8 +503,8 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div class="bottom-nav-container">', unsafe_allow_html=True)
 nav_cols = st.columns(3)
 with nav_cols[0]:
-    if st.button("Predictor", key="pred_btn_h", use_container_width=True):
-        st.session_state.active_page = 'Predictor'
+    if st.button("Home", key="pred_btn_h", use_container_width=True):
+        st.session_state.active_page = 'Home'
         st.rerun()
 with nav_cols[1]:
     if st.button("Market", key="market_btn_h", use_container_width=True):
@@ -389,9 +520,9 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown(
     f"""
     <div class="bottom-nav">
-        <div class="nav-item {'active' if st.session_state.active_page == 'Predictor' else ''}">
+        <div class="nav-item {'active' if st.session_state.active_page == 'Home' else ''}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
-            Predictor
+            Home
         </div>
         <div class="nav-item {'active' if st.session_state.active_page == 'Market' else ''}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
@@ -405,27 +536,3 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
-# CSS for the transparent buttons in the bottom nav
-st.markdown("""
-<style>
-    .bottom-nav-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        z-index: 101; /* Above the visual nav bar */
-        height: 65px; /* Match visual bar height */
-    }
-    .bottom-nav-container .stButton > button {
-        background: transparent;
-        border: none;
-        color: transparent; /* Hide button text */
-        width: 100%;
-        height: 65px;
-    }
-    .bottom-nav-container .stButton > button:hover {
-        background-color: rgba(88, 166, 255, 0.1);
-        border-radius: 10px;
-    }
-</style>
-""", unsafe_allow_html=True)
