@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import time
-import random
 import requests
 from sklearn.linear_model import LinearRegression
 
@@ -176,19 +175,22 @@ st.markdown("""
         color: #3fb950;
     }
 
-    /* Bottom Navigation Bar */
+    /* Bottom Navigation Bar --- MODIFIED SECTION --- */
     .bottom-nav {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        background-color: #161B22;
-        border-top: 1px solid #30363d;
+        /* New Gradient Background */
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364); 
+        /* Removed border and added a shadow for depth */
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
         display: flex;
         justify-content: space-around;
         padding: 0.5rem 0;
         z-index: 100;
     }
+    
     .nav-item {
         display: flex;
         flex-direction: column;
@@ -440,4 +442,3 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
