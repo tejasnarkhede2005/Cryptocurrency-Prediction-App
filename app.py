@@ -95,18 +95,7 @@ st.markdown("""
         margin: auto;
     }
     
-    /* Custom Card */
-    .custom-card {
-        background-color: #161B22;
-        border: 1px solid #30363d;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 1rem;
-        transition: box-shadow 0.3s ease;
-    }
-    .custom-card:hover {
-        box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
-    }
+   
     
     h1 {
         font-size: 1.8rem;
@@ -333,7 +322,6 @@ def render_predictor():
 
 def render_market():
     """Renders the live market page using data from an API."""
-    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("<h2>Live Market</h2>", unsafe_allow_html=True)
     
     market_data = get_live_prices()
@@ -445,4 +433,5 @@ st.markdown(
     </div>
     """, unsafe_allow_html=True
 )
+
 
