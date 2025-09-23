@@ -33,7 +33,7 @@ model = load_model()
 # ==========================
 
 if 'active_page' not in st.session_state:
-    st.session_state.active_page = 'Predictor'
+    st.session_state.active_page = 'Home' # Renamed for clarity
 if 'history' not in st.session_state:
     st.session_state.history = []
 
@@ -95,7 +95,18 @@ st.markdown("""
         margin: auto;
     }
     
-    
+    /* Custom Card */
+    .custom-card {
+        background-color: #161B22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 1rem;
+        transition: box-shadow 0.3s ease;
+    }
+    .custom-card:hover {
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.2);
+    }
     
     h1 {
         font-size: 1.8rem;
@@ -174,7 +185,47 @@ st.markdown("""
         color: #3fb950;
     }
 
-    /* Bottom Navigation Bar */
+    /* --- TOP NAVIGATION BAR --- */
+    .top-nav {
+        background-color: #161B22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 0.5rem;
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 1.5rem;
+    }
+    .top-nav-item {
+        color: #8b949e;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: background-color 0.3s, color 0.3s;
+        cursor: pointer;
+        text-align: center;
+        flex: 1;
+    }
+    .top-nav-item.active {
+        background: linear-gradient(45deg, #3672f8, #58a6ff);
+        color: white;
+    }
+    .top-nav-container {
+        position: absolute;
+        width: calc(100% - 2rem);
+        max-width: 600px;
+        height: 54px; /* Match visual bar height */
+        z-index: 102;
+    }
+    .top-nav-container .stButton > button {
+        background: transparent !important;
+        border: none !important;
+        color: transparent !important;
+        width: 100%;
+        height: 54px;
+    }
+
+
+    /* --- BOTTOM NAVIGATION BAR --- */
     .bottom-nav {
         position: fixed;
         bottom: 0;
@@ -212,7 +263,27 @@ st.markdown("""
         height: 24px;
         margin-bottom: 4px;
     }
+    .bottom-nav-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 101; /* Above the visual nav bar */
+        height: 65px; /* Match visual bar height */
+    }
+    .bottom-nav-container .stButton > button {
+        background: transparent;
+        border: none;
+        color: transparent; /* Hide button text */
+        width: 100%;
+        height: 65px;
+    }
+    .bottom-nav-container .stButton > button:hover {
+        background-color: rgba(88, 166, 255, 0.1);
+        border-radius: 10px;
+    }
 
+    /* --- OTHER STYLES --- */
     /* Market List */
     .crypto-item {
         display: flex;
@@ -263,27 +334,6 @@ st.markdown("""
         margin-bottom: 0.5rem;
         border: 1px solid #30363d;
     }
-    
-    /* Transparent Nav Button Container */
-    .bottom-nav-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        z-index: 101; /* Above the visual nav bar */
-        height: 65px; /* Match visual bar height */
-    }
-    .bottom-nav-container .stButton > button {
-        background: transparent;
-        border: none;
-        color: transparent; /* Hide button text */
-        width: 100%;
-        height: 65px;
-    }
-    .bottom-nav-container .stButton > button:hover {
-        background-color: rgba(88, 166, 255, 0.1);
-        border-radius: 10px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -291,7 +341,7 @@ st.markdown("""
 # Page Rendering Functions
 # ==========================
 
-def render_predictor():
+def render_home():
     """Renders the main predictor interface."""
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("<h2>Input Market Features</h2>", unsafe_allow_html=True)
@@ -358,7 +408,7 @@ def render_market():
 
 def render_history():
     """Renders the prediction history page."""
- 
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("<h2>Prediction History</h2>", unsafe_allow_html=True)
 
     if not st.session_state.history:
@@ -376,22 +426,82 @@ def render_history():
             )
     st.markdown('</div>', unsafe_allow_html=True)
 
+def render_about():
+    """Renders the about page."""
+    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
+    st.markdown("<h2>About This App</h2>", unsafe_allow_html=True)
+    st.markdown("""
+    <p>This application provides cryptocurrency price predictions based on a machine learning model.</p>
+    <strong>Key Features:</strong>
+    <ul>
+        <li><strong>AI-Powered Predictions:</strong> Uses a regression model to forecast prices based on market features.</li>
+        <li><strong>Live Market Data:</strong> Fetches real-time crypto prices from the CoinGecko API.</li>
+        <li><strong>Prediction History:</strong> Keeps a record of all your past predictions.</li>
+    </ul>
+    <p><em>Disclaimer: The predictions provided by this tool are for informational and educational purposes only. They should not be considered financial advice.</em></p>
+    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 # ==========================
 # Main App Layout
 # ==========================
+
+# --- TOP NAVIGATION ---
+# This is a hacky way to create a clickable nav bar in Streamlit
+# 1. Create the visual HTML bar
+# 2. Create an invisible container of Streamlit buttons layered on top
+
+st.markdown(
+    f"""
+    <div class="top-nav">
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'Home' else ''}">Home</div>
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'Market' else ''}">Market</div>
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'History' else ''}">History</div>
+        <div class="top-nav-item {'active' if st.session_state.active_page == 'About' else ''}">About</div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Invisible button container
+st.markdown('<div class="top-nav-container">', unsafe_allow_html=True)
+top_nav_cols = st.columns(4)
+with top_nav_cols[0]:
+    if st.button("Home", key="home_btn_top", use_container_width=True):
+        st.session_state.active_page = 'Home'
+        st.rerun()
+with top_nav_cols[1]:
+    if st.button("Market", key="market_btn_top", use_container_width=True):
+        st.session_state.active_page = 'Market'
+        st.rerun()
+with top_nav_cols[2]:
+    if st.button("History", key="history_btn_top", use_container_width=True):
+        st.session_state.active_page = 'History'
+        st.rerun()
+with top_nav_cols[3]:
+    if st.button("About", key="about_btn_top", use_container_width=True):
+        st.session_state.active_page = 'About'
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- MAIN CONTENT ---
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
+
 st.markdown('<h1><span class="icon">🔮</span>Crypto Currency Prediction</h1>', unsafe_allow_html=True)
 st.markdown('<div class="subtitle">Your AI-powered crypto price oracle. Adjust the sliders below to get a prediction.</div>', unsafe_allow_html=True)
 
 
 # Page content based on session state
-if st.session_state.active_page == 'Predictor':
-    render_predictor()
+if st.session_state.active_page == 'Home':
+    render_home()
 elif st.session_state.active_page == 'Market':
     render_market()
 elif st.session_state.active_page == 'History':
     render_history()
+elif st.session_state.active_page == 'About':
+    render_about()
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -404,8 +514,8 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div class="bottom-nav-container">', unsafe_allow_html=True)
 nav_cols = st.columns(3)
 with nav_cols[0]:
-    if st.button("Predictor", key="pred_btn_h", use_container_width=True):
-        st.session_state.active_page = 'Predictor'
+    if st.button("Home", key="pred_btn_h", use_container_width=True):
+        st.session_state.active_page = 'Home'
         st.rerun()
 with nav_cols[1]:
     if st.button("Market", key="market_btn_h", use_container_width=True):
@@ -421,9 +531,9 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown(
     f"""
     <div class="bottom-nav">
-        <div class="nav-item {'active' if st.session_state.active_page == 'Predictor' else ''}">
+        <div class="nav-item {'active' if st.session_state.active_page == 'Home' else ''}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" /></svg>
-            Predictor
+            Home
         </div>
         <div class="nav-item {'active' if st.session_state.active_page == 'Market' else ''}">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
@@ -436,5 +546,4 @@ st.markdown(
     </div>
     """, unsafe_allow_html=True
 )
-
 
