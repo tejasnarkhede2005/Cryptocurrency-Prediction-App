@@ -114,12 +114,24 @@ st.markdown("""
         color: #f0f6fc;
         display: flex;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem; /* Adjusted margin */
     }
     
     h1 .icon {
         font-size: 2rem;
         margin-right: 0.8rem;
+    }
+
+    /* Subtitle Style */
+    .subtitle {
+        font-size: 1rem;
+        color: #8b949e;
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 0.75rem;
+        background-color: #161B22;
+        border-radius: 12px;
+        border: 1px solid #30363d;
     }
 
     h2 {
@@ -381,6 +393,8 @@ def render_history():
 # ==========================
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
 st.markdown('<h1><span class="icon">🔮</span>Crypto Currency Prediction</h1>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Your AI-powered crypto price oracle. Adjust the sliders below to get a prediction.</div>', unsafe_allow_html=True)
+
 
 # Page content based on session state
 if st.session_state.active_page == 'Predictor':
@@ -433,3 +447,4 @@ st.markdown(
     </div>
     """, unsafe_allow_html=True
 )
+
