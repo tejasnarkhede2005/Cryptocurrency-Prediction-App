@@ -22,7 +22,6 @@ def load_model():
     # Fit on a zero array just to initialize the model structure
     dummy_model.fit(np.zeros((1, 4)), np.zeros(1))
     # Manually set coefficients and intercept for a dynamic response
-    # These values are chosen to create a plausible-looking prediction
     dummy_model.coef_ = np.array([0.1, 0.2, 0.05, 0.15])
     dummy_model.intercept_ = 150.0  # Set a base value for the prediction
     return dummy_model
@@ -48,7 +47,6 @@ def get_live_prices():
     Fetches live cryptocurrency prices from the CoinGecko API.
     """
     url = "https://api.coingecko.com/api/v3/coins/markets"
-    # A list of popular cryptocurrencies
     coin_ids = "bitcoin,ethereum,ripple,tether,binancecoin,solana,usd-coin,dogecoin"
     params = {
         "vs_currency": "usd",
@@ -143,13 +141,13 @@ st.markdown("""
         color: white;
         width: 100%;
         border-radius: 8px;
-        padding: 16px 0; /* Increased padding for a larger button */
+        padding: 16px 0;
         font-weight: bold;
-        font-size: 1.1rem; /* Larger font size */
+        font-size: 1.1rem;
         border: none;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         transition: transform 0.2s, box-shadow 0.2s;
-        margin-top: 1rem; /* Added margin on top */
+        margin-top: 1rem;
     }
     .main-content .stButton > button:hover {
         transform: translateY(-2px);
@@ -175,15 +173,13 @@ st.markdown("""
         color: #3fb950;
     }
 
-    /* Bottom Navigation Bar --- MODIFIED SECTION --- */
+    /* Bottom Navigation Bar */
     .bottom-nav {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        /* New Gradient Background */
         background: linear-gradient(to right, #0f2027, #203a43, #2c5364); 
-        /* Removed border and added a shadow for depth */
         box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
         display: flex;
         justify-content: space-around;
@@ -266,7 +262,27 @@ st.markdown("""
         margin-bottom: 0.5rem;
         border: 1px solid #30363d;
     }
-
+    
+    /* Transparent Nav Button Container */
+    .bottom-nav-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 101; /* Above the visual nav bar */
+        height: 65px; /* Match visual bar height */
+    }
+    .bottom-nav-container .stButton > button {
+        background: transparent;
+        border: none;
+        color: transparent; /* Hide button text */
+        width: 100%;
+        height: 65px;
+    }
+    .bottom-nav-container .stButton > button:hover {
+        background-color: rgba(88, 166, 255, 0.1);
+        border-radius: 10px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -417,28 +433,3 @@ st.markdown(
     </div>
     """, unsafe_allow_html=True
 )
-
-# CSS for the transparent buttons in the bottom nav
-st.markdown("""
-<style>
-    .bottom-nav-container {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        z-index: 101; /* Above the visual nav bar */
-        height: 65px; /* Match visual bar height */
-    }
-    .bottom-nav-container .stButton > button {
-        background: transparent;
-        border: none;
-        color: transparent; /* Hide button text */
-        width: 100%;
-        height: 65px;
-    }
-    .bottom-nav-container .stButton > button:hover {
-        background-color: rgba(88, 166, 255, 0.1);
-        border-radius: 10px;
-    }
-</style>
-""", unsafe_allow_html=True)
