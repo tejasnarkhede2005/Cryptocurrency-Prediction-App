@@ -379,7 +379,7 @@ def render_history():
 # ==========================
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
 st.markdown('<h1><span class="icon">🔮</span>Crypto Currency Prediction</h1>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Your AI-powered crypto price oracle. Adjust the sliders below to get a prediction.</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Your AI-powered crypto price prediction. Adjust the sliders below to get a prediction.</div>', unsafe_allow_html=True)
 
 
 # Page content based on session state
@@ -433,5 +433,6 @@ st.markdown(
     </div>
     """, unsafe_allow_html=True
 )
+
 
 
